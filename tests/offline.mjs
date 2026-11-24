@@ -34,22 +34,35 @@ try {
   const bytes = await readFile(await download.path());
   assert.equal(bytes.subarray(0, 2).toString(), "PK");
   await page.getByRole("button", { name: "Импорт файлов" }).click();
-  await page
-    .getByTestId("file-input")
-    .setInputFiles({
-      name: "roundtrip.xlsx",
-      mimeType: "application/octet-stream",
-      buffer: bytes,
-    });
+  await page.getByTestId("file-input").setInputFiles({
+    name: "roundtrip.xlsx",
+    mimeType: "application/octet-stream",
+    buffer: bytes,
+  });
   await page.getByRole("heading", { name: "roundtrip" }).waitFor();
   assert.equal(
     await page.getByRole("columnheader", { name: "Розничная цена" }).count(),
     1,
   );
+  await page.locator("nav").getByRole("button", { name: "Обзор" }).click();
+  await page.locator('[data-sample="sales"]').click();
+  await page.getByRole("img", { name: "Диаграмма отчёта" }).waitFor();
+  for (const kind of ["PNG", "PDF"]) {
+    const wait = page.waitForEvent("download");
+    await page.getByRole("button", { name: kind, exact: true }).click();
+    const item = await wait,
+      blob = await readFile(await item.path());
+    if (kind === "PNG") assert.equal(blob.subarray(1, 4).toString(), "PNG");
+    else assert.equal(blob.subarray(0, 5).toString(), "%PDF-");
+  }
+  await page.locator("nav").getByRole("button", { name: "Обзор" }).click();
+  await page.getByRole("button", { name: "Все 8 шаблонов" }).click();
+  await page.locator('[data-sample="api"]').click();
+  await page.locator(".sheet.cells tbody tr").first().waitFor();
   assert.deepEqual(requests, [address]);
   assert.deepEqual(errors, []);
   console.log(
-    "Offline single-document smoke passed: scenario; XLSX download and reimport; no requests after loading the document and no runtime errors.",
+    "Offline single-document smoke passed: scenario, XLSX download and reimport, sales dashboard, PNG/PDF exports and bundled API sample; no requests after loading the document and no runtime errors.",
   );
 } finally {
   await browser.close();

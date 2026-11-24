@@ -3,48 +3,8 @@ import { readFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import ExcelJS from "exceljs";
 const { Workbook } = ExcelJS;
-const origin = "https://datamaster.test";
+import { start, importFile, origin } from "./helpers";
 const screens = path.resolve("docs/screenshots");
-async function start(page: Page, appOrigin = origin) {
-  // Serve the exact production assets to the test browser with the production CSP.
-  const headers = await readFile("dist/_headers", "utf8");
-  const csp = headers
-    .split("\n")
-    .find((x) => x.includes("Content-Security-Policy:"))!
-    .split(": ")
-    .slice(1)
-    .join(": ");
-  await page.route(appOrigin + "/**", async (route) => {
-    const pathname = new URL(route.request().url()).pathname;
-    const file = path.join(
-      process.cwd(),
-      "dist",
-      pathname === "/" ? "index.html" : pathname,
-    );
-    await route.fulfill({
-      path: file,
-      headers: { "Content-Security-Policy": csp },
-    });
-  });
-  await page.goto(appOrigin);
-  await page.getByRole("heading", { name: "Рабочее пространство" }).waitFor();
-  await page.evaluate(() => document.fonts.ready);
-}
-async function importFile(page: Page, name: string, body: Buffer) {
-  await page
-    .getByRole("button", { name: "Импорт файлов", exact: true })
-    .click();
-  await page
-    .getByTestId("file-input")
-    .setInputFiles({
-      name,
-      mimeType: "application/octet-stream",
-      buffer: body,
-    });
-  await expect(
-    page.getByRole("heading", { name: name.replace(/\.[^.]+$/, "") }),
-  ).toBeVisible();
-}
 async function shot(page: Page, name: string) {
   if (process.env.PORTFOLIO_SCREENSHOTS === "1") {
     await mkdir(screens, { recursive: true });
@@ -307,7 +267,7 @@ test("live cross-origin HTTPS GET, bearer preflight, denial and credential clean
     const policy = (await readFile("dist/_headers", "utf8"))
       .split("\n")
       .find((x) => x.includes("Content-Security-Policy:"))!
-      .split(": ")[1];
+      .replace(/^\s*Content-Security-Policy:\s*/, "");
     appServer = createServer(
       { key: await readFile(key), cert: await readFile(cert) },
       async (req, res) => {

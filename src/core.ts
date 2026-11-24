@@ -1,7 +1,9 @@
+import type { SheetMeta } from "./studio/model";
 export type Cell = string | number | boolean | null;
 export type Grid = { cols: string[]; rows: Cell[][] };
 export type Format = "XLSX" | "CSV" | "JSON" | "API";
 export type Table = Grid & {
+  meta?: SheetMeta;
   id: string;
   name: string;
   format: Format;
@@ -36,6 +38,8 @@ export function validGrid(g: Grid): Grid {
   return g;
 }
 export function headers(names: unknown[]): string[] {
+  if (names.some((n) => String(n ?? "").length > 32767))
+    throw Error("cellLength");
   const used = new Set<string>();
   return names.map((n, i) => {
     const base = String(n ?? "").trim() || "Column " + (i + 1);
@@ -50,7 +54,7 @@ export function headers(names: unknown[]): string[] {
   });
 }
 export const str = (v: Cell | undefined) => String(v ?? "");
-function num(v: Cell | undefined): number {
+export function num(v: Cell | undefined): number {
   if (typeof v === "number") return v;
   if (typeof v !== "string" || !v.trim()) return NaN;
   return Number(
@@ -263,16 +267,26 @@ export function fromJSON(value: unknown): Grid {
     value.some((x) => typeof x !== "object" || x === null || Array.isArray(x))
   )
     throw Error("json");
-  const keys = [...new Set(value.flatMap((x) => Object.keys(x)))];
-  if (keys.length * value.length > LIMIT_CELLS) throw Error("limits");
+  if (value.length > LIMIT_ROWS) throw Error("limits");
+  const fields = new Set<string>();
+  for (const record of value) {
+    for (const field of Object.keys(record)) {
+      fields.add(field);
+      if (fields.size > LIMIT_COLS || fields.size * value.length > LIMIT_CELLS)
+        throw Error("limits");
+    }
+  }
+  const keys = [...fields];
   return validGrid({
     cols: headers(keys),
     rows: value.map((o) =>
       keys.map((k) => {
         const v = Object.hasOwn(o, k) ? o[k] : null;
-        return typeof v === "object" && v !== null
-          ? JSON.stringify(v)
-          : (v ?? null);
+        const scalar =
+          typeof v === "object" && v !== null ? JSON.stringify(v) : (v ?? null);
+        if (typeof scalar === "string" && scalar.length > 32767)
+          throw Error("cellLength");
+        return scalar;
       }),
     ),
   });
@@ -288,6 +302,13 @@ export function matrix(data: Cell[][]): Grid {
     rows: data
       .slice(1)
       .filter((r) => r.some((c) => c !== null && c !== ""))
-      .map((r) => cols.map((_, i) => r[i] ?? null)),
+      .map((r) =>
+        cols.map((_, i) => {
+          const v = r[i] ?? null;
+          if (typeof v === "string" && v.length > 32767)
+            throw Error("cellLength");
+          return v;
+        }),
+      ),
   });
 }

@@ -1,3 +1,6 @@
+import { background } from "./studio/worker";
+import { PreviewGrid } from "./studio/widgets";
+import { saveBlob } from "./studio/download";
 import { useEffect, useRef, useState } from "react";
 import {
   UploadCloud,
@@ -12,11 +15,6 @@ import {
   LoaderCircle,
 } from "lucide-react";
 import {
-  appendTables,
-  applyStep,
-  compareTables,
-  joinTables,
-  runRecipe,
   type Format,
   type Grid,
   type Recipe,
@@ -24,7 +22,7 @@ import {
   type Table,
 } from "./core";
 import { demo, templates } from "./demo";
-import { parseFile, fetchGrid, downloadGrid } from "./io";
+import { fetchGrid } from "./io";
 import {
   Modal,
   ErrorBox,
@@ -96,8 +94,11 @@ export function ImportDialog({
     setBusy(true);
     setErr("");
     try {
-      const result: NewTable[] = [];
-      for (const f of Array.from(fs)) result.push(...(await parseFile(f)));
+      abort.current = new AbortController();
+      const result = await background<NewTable[]>(
+        { op: "import", files: Array.from(fs) },
+        abort.current.signal,
+      );
       if (alive.current) save(result);
     } catch (e) {
       if (alive.current) setErr(errorText(e, t));
@@ -305,7 +306,19 @@ export function OpDialog({
     Sale(b.cols.find((x) => x !== c) ?? c);
     E("");
   }
-  function run() {
+  const [preview, Preview] = useState<Grid | null>(null),
+    [busy, Busy] = useState(false);
+  const controller = useRef<AbortController | null>(null);
+  useEffect(() => () => controller.current?.abort(), []);
+  useEffect(() => {
+    Preview(null);
+  }, [id, k, col, target, value, find, percent, desc, op, sale]);
+  async function run(onlyPreview = false) {
+    controller.current?.abort();
+    const ac = new AbortController();
+    controller.current = ac;
+    Busy(true);
+
     try {
       let s: Step;
       switch (k) {
@@ -334,9 +347,18 @@ export function OpDialog({
           s = { kind: k, col, find, value };
           break;
       }
-      save(a, s, applyStep(a, s));
+      const result = await background<Grid>(
+        { op: "recipe", grid: { cols: a.cols, rows: a.rows }, steps: [s] },
+        ac.signal,
+      );
+      if (!ac.signal.aborted) {
+        if (onlyPreview) Preview(result);
+        else save(a, s, result);
+      }
     } catch (e) {
-      E(errorText(e, t));
+      if (!ac.signal.aborted) E(errorText(e, t));
+    } finally {
+      if (!ac.signal.aborted) Busy(false);
     }
   }
   return (
@@ -484,12 +506,30 @@ export function OpDialog({
             <input value={value} onChange={(e) => V(e.target.value)} />
           </label>
         )}
+        {preview && <PreviewGrid g={preview} t={t} max={4} />}
+        {(Object.keys(a.meta?.formulas ?? {}).length > 0 ||
+          Object.keys(a.meta?.styles ?? {}).length > 0) && (
+          <p className="hint">
+            {t(
+              "Результат будет добавлен отдельным листом значений. Исходный лист сохранится.",
+              "The result will be a separate values sheet. The source sheet is preserved.",
+            )}
+          </p>
+        )}
         <ErrorBox message={err} />
         <div className="modalfoot">
           <button type="button" className="btn" onClick={close}>
             {t("Отмена", "Cancel")}
           </button>
-          <button className="btn primary">
+          <button
+            type="button"
+            disabled={busy}
+            className="btn"
+            onClick={() => run(true)}
+          >
+            {t("Предпросмотр", "Preview")}
+          </button>
+          <button disabled={busy} className="btn primary">
             <Check size={16} />
             {t("Применить", "Apply")}
           </button>
@@ -521,14 +561,35 @@ export function CombineDialog({
     [ka, A] = useState(a.cols[0]),
     [kb, B] = useState(b.cols[0]),
     [err, E] = useState("");
-  const run = () => {
+  const [preview, Preview] = useState<Grid | null>(null),
+    [busy, Busy] = useState(false);
+  const ctrl = useRef<AbortController | null>(null);
+  useEffect(() => () => ctrl.current?.abort(), []);
+  useEffect(() => {
+    Preview(null);
+  }, [left, right, mode, ka, kb]);
+  const run = async (onlyPreview = false) => {
+    const ac = new AbortController();
+    ctrl.current = ac;
+    Busy(true);
     try {
-      const result =
-        mode === "append"
-          ? appendTables(a, b)
-          : mode === "join"
-            ? joinTables(a, b, ka, kb)
-            : compareTables(a, b, ka, kb, t("ru", "en") === "en");
+      const result = await background<Grid>(
+        {
+          op: "combine",
+          left: { cols: a.cols, rows: a.rows },
+          right: { cols: b.cols, rows: b.rows },
+          mode,
+          ka,
+          kb,
+          en: t("ru", "en") === "en",
+        },
+        ac.signal,
+      );
+      if (ac.signal.aborted) return;
+      if (onlyPreview) {
+        Preview(result);
+        return;
+      }
       save([
         {
           ...result,
@@ -544,7 +605,9 @@ export function CombineDialog({
         },
       ]);
     } catch (e) {
-      E(errorText(e, t));
+      if (!ac.signal.aborted) E(errorText(e, t));
+    } finally {
+      if (!ac.signal.aborted) Busy(false);
     }
   };
   return (
@@ -614,9 +677,13 @@ export function CombineDialog({
           "The result will open in a new table.",
         )}
       </p>
+      {preview && <PreviewGrid g={preview} t={t} max={4} />}
       <ErrorBox message={err} />
       <div className="modalfoot">
-        <button className="btn primary" onClick={run}>
+        <button disabled={busy} className="btn" onClick={() => run(true)}>
+          {t("Предпросмотр", "Preview")}
+        </button>
+        <button disabled={busy} className="btn primary" onClick={() => run()}>
           <Plus size={16} />
           {t("Создать таблицу", "Create table")}
         </button>
@@ -647,14 +714,30 @@ export function RecipeDialog({
     [id, S] = useState(built ? "_demo" : initial),
     [err, E] = useState("");
   const title = built ? t(...item.title) : item.name;
-  function run() {
+  const [busy, Busy] = useState(false),
+    ctrl = useRef<AbortController | null>(null);
+  useEffect(() => () => ctrl.current?.abort(), []);
+  async function run() {
+    const ac = new AbortController();
+    ctrl.current = ac;
+    Busy(true);
     try {
       const fresh = built && id === "_demo",
         a = fresh ? demo(item.source) : tables.find((x) => x.id === id);
       if (!a) throw Error("empty");
-      save(a, runRecipe(a, item.steps), title, fresh, item.steps);
+      const g = await background<Grid>(
+        {
+          op: "recipe",
+          grid: { cols: a.cols, rows: a.rows },
+          steps: item.steps,
+        },
+        ac.signal,
+      );
+      if (!ac.signal.aborted) save(a, g, title, fresh, item.steps);
     } catch (e) {
-      E(errorText(e, t));
+      if (!ac.signal.aborted) E(errorText(e, t));
+    } finally {
+      if (!ac.signal.aborted) Busy(false);
     }
   }
   return (
@@ -685,7 +768,7 @@ export function RecipeDialog({
       </label>
       <ErrorBox message={err} />
       <div className="modalfoot">
-        <button className="btn primary" onClick={run}>
+        <button disabled={busy} className="btn primary" onClick={run}>
           <Play size={15} />
           {t("Запустить сценарий", "Run scenario")}
         </button>
@@ -700,7 +783,7 @@ export function ExportDialog({
   name,
   done,
 }: Common & { a: Table; name: string; done: () => void }) {
-  const [fmt, F] = useState<"XLSX" | "CSV" | "JSON">(
+  const [fmt, F] = useState<"XLSX" | "CSV" | "JSON" | "PDF">(
       a.format === "API" ? "JSON" : a.format,
     ),
     [busy, B] = useState(false),
@@ -711,13 +794,13 @@ export function ExportDialog({
         {name} · {a.rows.length} {t("строк", "rows")}
       </p>
       <div className="format-options">
-        {(["XLSX", "CSV", "JSON"] as const).map((f) => (
+        {(["XLSX", "CSV", "JSON", "PDF"] as const).map((f) => (
           <button
             key={f}
             className={f === fmt ? "selected" : ""}
             onClick={() => F(f)}
           >
-            <FormatIcon format={f} />
+            {f === "PDF" ? <Download size={20} /> : <FormatIcon format={f} />}
             {f}
           </button>
         ))}
@@ -730,7 +813,17 @@ export function ExportDialog({
           onClick={async () => {
             B(true);
             try {
-              await downloadGrid(a, name, fmt);
+              if (fmt === "PDF") {
+                const { pdfReport } = await import("./studio/pdf");
+                pdfReport(name, a);
+              } else {
+                const blob = await background<Blob>({
+                  op: "encode",
+                  grid: a,
+                  format: fmt,
+                });
+                saveBlob(blob, name + "." + fmt.toLowerCase());
+              }
               done();
             } catch (e) {
               E(errorText(e, t));

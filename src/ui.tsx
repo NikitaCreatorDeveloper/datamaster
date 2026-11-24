@@ -141,9 +141,70 @@ export function ErrorBox({ message }: { message: string }) {
 export function errorText(e: unknown, t: T) {
   const msg = e instanceof Error ? e.message : "";
   const dict: Record<string, [string, string]> = {
+    date: [
+      "Введите дату в формате ГГГГ-ММ-ДД.",
+      "Enter a valid date in YYYY-MM-DD format.",
+    ],
+    phone: ["Проверьте телефонные номера.", "Check the phone numbers."],
+    styleLimit: [
+      "За один раз можно изменить до 100 000 ячеек.",
+      "Select up to 100,000 cells per edit.",
+    ],
+    lastColumn: [
+      "Оставьте хотя бы один столбец.",
+      "A sheet requires at least one column.",
+    ],
+    pivotLimit: [
+      "Слишком много значений разбивки. Выберите другой столбец.",
+      "Too many series. Select a different split column.",
+    ],
+    outputNames: [
+      "Введите непустые уникальные названия выходных столбцов.",
+      "Use distinct nonempty output column names.",
+    ],
+    timeout: [
+      "Операция превысила лимит времени. Уменьшите набор данных.",
+      "The operation timed out. Reduce the dataset.",
+    ],
+    worker: [
+      "Не удалось запустить фоновое вычисление в браузере.",
+      "The browser could not run the background calculation.",
+    ],
+    projectFormat: [
+      "Структура проекта или сценария повреждена либо не поддерживается.",
+      "The project or workflow file is invalid or unsupported.",
+    ],
+    pdfLimit: [
+      "Для PDF выберите до 60 000 ячеек и 40 столбцов.",
+      "PDF supports up to 60,000 cells and 40 columns.",
+    ],
+    jsonFields: [
+      "Проверьте JSON. Параметры и заголовки задаются объектом строк.",
+      "Check the JSON. Parameters and headers must be a string map.",
+    ],
+    auth: [
+      "Введите данные для выбранного типа авторизации.",
+      "Enter credentials for the selected authorization type.",
+    ],
+    paging: [
+      "Источник вернул повторный курсор пагинации.",
+      "The endpoint returned a repeated cursor.",
+    ],
+    exportLast: [
+      "Разместите единственный шаг экспорта в конце.",
+      "Place a single export step at the end.",
+    ],
     empty: [
       "Нет заголовков или листов с данными.",
       "There are no headers or populated worksheets.",
+    ],
+    projectLimit: [
+      "В проекте помещается до 150 листов и 3 млн ячеек. Создайте ещё один проект.",
+      "A project holds up to 150 sheets and 3 million cells. Create another project.",
+    ],
+    cellLength: [
+      "Ячейка превышает предел Excel в 32 767 символов.",
+      "A cell exceeds the Excel limit of 32,767 characters.",
     ],
     limits: [
       "Лимит таблицы — 100 000 строк, 300 столбцов и 1,5 млн ячеек.",
@@ -199,6 +260,11 @@ export function errorText(e: unknown, t: T) {
       "The browser could not save this scenario. Check storage space and permissions.",
     ],
   };
+  if (msg.includes(" / ")) {
+    const parts = msg.split(" / ");
+    const key = parts.pop()!;
+    return parts.join(" / ") + " · " + (dict[key] ? t(...dict[key]) : key);
+  }
   if (dict[msg]) return t(...dict[msg]);
   if (/^HTTP \d+$/.test(msg))
     return t("Источник вернул ошибку ", "Source returned ") + msg;

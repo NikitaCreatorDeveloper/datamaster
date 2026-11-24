@@ -25,7 +25,9 @@ import { type Table, type Recipe } from "./core";
 import { templates } from "./demo";
 import { Artwork } from "./Artwork";
 import { FormatIcon, type T } from "./ui";
+import { BusinessGallery } from "./studio/BusinessGallery";
 export type DContext = {
+  launch: (id: string) => Promise<void>;
   t: T;
   tables: Table[];
   recipes: Recipe[];
@@ -346,13 +348,13 @@ export function Dashboard({ ctx }: { ctx: DContext }) {
         <div className="herocopy">
           <div className="studio">
             <span className="studio-dot" />
-            DATA STUDIO
+            DATAMASTER STUDIO / 2.0
           </div>
           <h1>{t("Рабочее пространство", "Workspace overview")}</h1>
           <p>
             {t(
-              "Таблицы, данные и автоматизация в одном месте.",
-              "Tables, data and automation in one place.",
+              "Редактируйте таблицы, стройте отчёты и автоматизируйте расчёты.",
+              "Edit workbooks, build reports and automate calculations.",
             )}
           </p>
           <div className="heroactions">
@@ -385,6 +387,7 @@ export function Dashboard({ ctx }: { ctx: DContext }) {
           </div>
         ))}
       </div>
+      <BusinessGallery t={t} launch={ctx.launch} compact />
       <div className="dashboardmiddle">
         <TableList ctx={ctx} />
         <section className="panel quickpanel">

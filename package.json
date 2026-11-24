@@ -1,13 +1,13 @@
 {
   "name": "datamaster-studio",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "tsx --test tests/core.test.ts",
+    "test": "tsx --test tests/*.test.ts",
     "test:e2e": "playwright test",
     "package:pages": "npm run build && node scripts/package-pages.mjs",
     "package:offline": "node scripts/package-offline.mjs",
@@ -15,11 +15,15 @@
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",
+    "chart.js": "^4.6.2",
     "exceljs": "^4.4.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.9",
     "lucide-react": "^0.552.0",
     "papaparse": "^5.5.3",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0",

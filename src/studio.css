@@ -1,0 +1,1175 @@
+/* Studio tools share the document, toolbar and selection colors of the workbook. */
+.studio2 .sidenav {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-top: 15px;
+}
+.studio2 .navitem {
+  margin-bottom: 2px;
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+.studio2 .sidebarbottom {
+  margin-top: 0;
+}
+.studio2 .navline {
+  margin: 15px 10px;
+}
+.studio2 .navitem.active {
+  box-shadow: inset 3px 0 0 #7c62e9;
+}
+.studio2 .hero {
+  background:
+    radial-gradient(ellipse at 79% 70%, #5b4f9e, transparent 55%),
+    linear-gradient(107deg, #272746, #393467 55%, #51448c);
+  min-height: 200px;
+}
+.studio2 .hero-dots {
+  background-size: 13px 13px;
+}
+.studio2 .herocopy {
+  padding: 26px 30px;
+}
+.studio2 .studio {
+  letter-spacing: 1.4px;
+  font-size: 10px;
+}
+.studio2 .metricgrid {
+  margin-bottom: 22px;
+}
+.studio2 .filemain strong {
+  font-size: 14px;
+}
+.studio2 .brandbutton {
+  flex-shrink: 0;
+}
+.project-switch {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 5px 9px;
+  color: var(--nav);
+  font-weight: 650;
+  font-size: 12px;
+  max-width: 180px;
+  overflow: hidden;
+}
+.project-switch:hover {
+  background: var(--soft);
+}
+.businessgallery {
+  margin-bottom: 22px;
+}
+.businessgrid {
+  display: grid;
+  gap: 13px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.businesscard {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  transition:
+    transform 0.18s,
+    border-color 0.18s,
+    box-shadow 0.18s;
+}
+.businesscard:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 5px 16px #30264c0c;
+}
+.businesscard > div:last-child {
+  padding: 12px 13px 15px;
+}
+.businesscard h3 {
+  font-size: 15px;
+  line-height: 1.35;
+}
+.businesscard p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.businesscard-art {
+  height: 65px;
+  width: 100%;
+  display: flex;
+  position: relative;
+  align-items: center;
+  padding: 0 15px;
+  overflow: hidden;
+  background: var(--tile-bg);
+  color: var(--tile-ink);
+  border-bottom: 1px solid var(--line);
+}
+.palette-violet {
+  --tile-bg: #eee9fa;
+  --tile-ink: #7860bf;
+}
+.palette-blue {
+  --tile-bg: #e5eefa;
+  --tile-ink: #4778b7;
+}
+.palette-aqua {
+  --tile-bg: #e3f1eb;
+  --tile-ink: #3c8d76;
+}
+.palette-apricot {
+  --tile-bg: #f9ece0;
+  --tile-ink: #b27c43;
+}
+.sample-lines {
+  position: absolute;
+  inset: -50% -8%;
+  transform: rotate(-21deg);
+  background:
+    linear-gradient(to right, currentColor 1px, transparent 1px),
+    linear-gradient(to bottom, currentColor 1px, transparent 1px);
+  background-size: 19px 19px;
+  opacity: 0.11;
+  mask-image: linear-gradient(90deg, transparent, #000 55%);
+}
+.sample-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  background: #ffffffca;
+  border: 1px solid color-mix(in srgb, currentColor 32%, white);
+  border-radius: 10px;
+  box-shadow: 2px 3px 0 color-mix(in srgb, currentColor 22%, white);
+  transform: rotate(-5deg);
+}
+.businesscard-art > span {
+  margin-left: auto;
+  width: 23px;
+  height: 23px;
+  background: #ffffffc7;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+}
+.sample-icon svg {
+  stroke-width: 1.7;
+}
+.businesscard-art:after {
+  content: "";
+  width: 55px;
+  height: 55px;
+  position: absolute;
+  right: 22%;
+  top: 18px;
+  border: 1px solid currentColor;
+  opacity: 0.17;
+  transform: rotate(-21deg);
+  border-radius: 9px;
+  box-shadow: 4px 4px 0 currentColor;
+}
+.studio-panel {
+  padding: 19px 20px;
+  min-width: 0;
+}
+.studio-panel .panelhead {
+  padding: 0 0 16px;
+}
+.studio-panel h2,
+.configpanel h2 {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+.buttonrow,
+.toolrow,
+.charttypes,
+.boardtabs,
+.httpbar,
+.pipetop,
+.flow-source,
+.templaterow,
+.chartfoot,
+.storagebanner,
+.flownode,
+.flownode > button,
+.stepheading,
+.ruleline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.buttonrow {
+  flex-wrap: wrap;
+}
+.topgap {
+  margin-top: 18px;
+}
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.studio-panel > .muted {
+  margin: 5px 0;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  margin: 10px 0 14px;
+  font-size: 13px;
+  font-weight: 680;
+  color: var(--nav);
+}
+.field > span {
+  line-height: 1.45;
+}
+.field input,
+.field select,
+.field textarea,
+.httpbar input,
+.flowlist > select,
+.modal textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background-color: var(--panel);
+  padding: 8px 10px;
+  min-height: 38px;
+  color: var(--text);
+  font-weight: 500;
+  font-size: 13px;
+}
+.field small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.field textarea,
+.modal textarea {
+  min-height: 78px;
+  resize: vertical;
+}
+.code,
+.endpoint,
+.httpstatus {
+  font-family: ui-monospace, "Courier New", monospace;
+}
+.code {
+  font-size: 12px;
+  line-height: 1.5;
+  tab-size: 2;
+}
+.studio-panel textarea.code {
+  min-height: 105px;
+  background: var(--soft);
+}
+.studio-panel pre,
+.endpoint {
+  display: block;
+  background: var(--soft);
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  overflow: auto;
+  max-height: 300px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.studio-layout,
+.flow-layout,
+.analytics-layout {
+  display: grid;
+  align-items: start;
+  grid-template-columns: minmax(0, 1.85fr) minmax(255px, 1fr);
+  gap: 16px;
+}
+.analytics-layout {
+  grid-template-columns: minmax(0, 1.85fr) minmax(260px, 1fr);
+  align-items: stretch;
+}
+.flow-layout {
+  grid-template-columns: minmax(250px, 1fr) minmax(0, 1.5fr);
+}
+fieldset {
+  min-width: 0;
+}
+.pipetop {
+  align-items: flex-end;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.pipetop .field {
+  flex: 1 1 150px;
+  margin: 0;
+}
+.pipetop .btn {
+  margin: 0;
+}
+.tabstrip {
+  display: flex;
+  gap: 5px;
+  border-bottom: 1px solid var(--line);
+  margin: 12px 0 14px;
+  overflow: auto;
+}
+.tabstrip button {
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 650;
+  padding: 7px 10px;
+  border-bottom: 2px solid transparent;
+}
+.tabstrip .on {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.httpbar select {
+  color: var(--mint-fg);
+  font-weight: 750;
+}
+.httpbar input {
+  flex: 1;
+}
+.httpstatus {
+  color: var(--mint-fg);
+  font-size: 12px;
+}
+.templaterow {
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+.templaterow > button:first-child {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 0;
+  text-align: left;
+}
+.templaterow b {
+  font-size: 10px;
+  background: var(--mint-bg);
+  color: var(--mint-fg);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.separule {
+  border-bottom: 1px solid var(--line);
+  margin: 18px 0;
+}
+.emptywell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 130px;
+  color: var(--muted);
+  text-align: center;
+  padding: 20px;
+}
+.emptywell svg {
+  color: var(--accent);
+}
+.previewgrid {
+  min-width: 0;
+  max-width: 100%;
+  margin: 12px 0;
+}
+.previewscroll {
+  overflow: auto;
+  max-height: 350px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.previewgrid table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 12px;
+}
+.previewgrid th,
+.previewgrid td {
+  border-bottom: 1px solid var(--line);
+  padding: 7px 10px;
+  white-space: nowrap;
+  max-width: 310px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.previewgrid th {
+  background: var(--soft);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-weight: 700;
+}
+.previewgrid tr:last-child td {
+  border-bottom: 0;
+}
+.previewgrid > small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 5px;
+}
+.studio-panel details {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding: 11px 0 0;
+}
+.studio-panel summary,
+.modal summary {
+  cursor: pointer;
+  font-weight: 650;
+  color: var(--nav);
+  font-size: 13px;
+}
+.studio-panel progress {
+  width: 100%;
+  height: 6px;
+  accent-color: var(--accent);
+}
+.previewtitle {
+  font-size: 14px;
+  margin: 12px 0 4px;
+}
+.flow-source {
+  background: var(--active);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--line));
+  border-radius: 8px;
+  padding: 9px 11px;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 13px;
+}
+.flow-source b {
+  margin-left: auto;
+}
+.flowlist > select,
+.flowlist > .btn {
+  margin-top: 9px;
+  width: 100%;
+}
+.flownodes {
+  padding: 10px 0 1px;
+}
+.flownode {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 3px 5px;
+  gap: 1px;
+  margin: 8px 0;
+  background: var(--panel);
+  position: relative;
+}
+.flownode:after {
+  content: "";
+  height: 8px;
+  position: absolute;
+  top: 100%;
+  left: 20px;
+  border-left: 1px dashed var(--muted);
+}
+.flownode:last-child:after {
+  display: none;
+}
+.flownode.chosen {
+  border-color: var(--accent);
+  background: var(--active);
+}
+.flownode > button:first-child {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  padding: 7px 2px;
+  text-align: left;
+}
+.flownode .iconbtn {
+  width: 23px;
+  height: 26px;
+}
+.flownode span,
+.stepheading > span {
+  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: var(--soft);
+  font-size: 11px;
+}
+.stepheading {
+  font-size: 16px;
+  color: var(--accent);
+  background: var(--active);
+  padding: 9px 12px;
+  border-radius: 8px;
+}
+.stagefields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 13px;
+  margin: 8px 0;
+}
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 160px;
+  overflow: auto;
+  margin: 10px 0;
+}
+.check,
+.checklist label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+}
+.check {
+  margin: 10px 0;
+}
+.check input,
+.checklist input {
+  accent-color: var(--accent);
+}
+.analytics-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.kpi {
+  padding: 14px 16px;
+  min-width: 0;
+}
+.kpi > div {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 680;
+}
+.kpi .metricicon {
+  height: 27px;
+  width: 27px;
+  border-radius: 7px;
+}
+.kpi b {
+  display: block;
+  font-size: clamp(17px, 1.8vw, 29px);
+  letter-spacing: -1px;
+  margin: 7px 0 2px;
+  line-height: 1.3;
+}
+.kpi small,
+.chartfoot small {
+  font-size: 11px;
+  color: var(--muted);
+}
+.chartwrap {
+  position: relative;
+  width: 100%;
+  height: 270px;
+}
+.charttypes {
+  gap: 2px;
+  background: var(--soft);
+  border-radius: 7px;
+  padding: 3px;
+}
+.charttypes button {
+  padding: 5px;
+  border-radius: 5px;
+  color: var(--muted);
+}
+.charttypes .on {
+  background: var(--panel);
+  color: var(--accent);
+  box-shadow: 0 1px 5px #26233916;
+}
+.chartfoot {
+  justify-content: space-between;
+  margin-top: 11px;
+}
+.configpanel .formgrid {
+  gap: 9px;
+}
+.configpanel .field {
+  margin: 5px 0 9px;
+}
+.configpanel h2 {
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+.boardtabs {
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+}
+.boardtabs > span {
+  display: inline-flex;
+  background: var(--active);
+  color: var(--accent);
+  border-radius: 6px;
+}
+.boardtabs button {
+  padding: 5px 8px;
+  font-size: 12px;
+}
+.storagebanner {
+  margin-bottom: 16px;
+  padding: 17px;
+  gap: 12px;
+}
+.storagebanner p,
+.projectcard p {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 3px 0 0;
+}
+.storagebanner .btn {
+  margin-left: auto;
+}
+.projectgrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.projectcard {
+  padding: 17px;
+}
+.projecticon {
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.projectcard.current {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
+}
+.projectcard h2 {
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+.projectcard .buttonrow {
+  margin-top: 15px;
+}
+.workbook {
+  padding: 0;
+  overflow: hidden;
+}
+.sheettabs {
+  display: flex;
+  overflow: auto;
+  gap: 3px;
+  border-bottom: 1px solid var(--line);
+  background: var(--soft);
+  padding: 7px 9px 0;
+}
+.sheettabs > button {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 6px 6px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sheettabs .active {
+  background: var(--panel);
+  color: var(--accent);
+  border-color: var(--line);
+  border-bottom: 2px solid var(--accent);
+}
+.ribbon {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+.ribbon select {
+  font-size: 12px;
+  padding: 4px 21px 4px 6px !important;
+  max-width: 140px;
+  min-height: 27px;
+}
+.tool,
+.color-tool {
+  width: 28px;
+  height: 28px;
+  display: inline-grid;
+  place-items: center;
+  position: relative;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--nav);
+  flex-shrink: 0;
+}
+.tool:hover,
+.color-tool:hover,
+.tool.selected {
+  background: var(--active);
+  color: var(--accent);
+}
+.color-tool input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+.toolsep {
+  height: 18px;
+  border-left: 1px solid var(--line);
+  margin: 0 3px;
+}
+.formulabar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.formulabar b {
+  min-width: 62px;
+  text-align: center;
+  border-right: 1px solid var(--line);
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--nav);
+}
+.formulabar i {
+  font-family: Georgia, serif;
+  font-weight: 650;
+  color: var(--accent);
+  font-size: 18px;
+}
+.formulabar input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  background: transparent;
+  color: var(--text);
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+}
+.workbook .sheettools {
+  padding: 7px 11px;
+}
+.viewport {
+  height: min(51vh, 540px);
+  min-height: 220px;
+  max-width: 100%;
+  position: relative;
+  overscroll-behavior: contain;
+  outline-offset: -2px;
+}
+.cells {
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 100%;
+}
+.cells th,
+.cells td {
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  overflow: visible;
+  position: relative;
+}
+.cells thead th {
+  position: sticky;
+  top: 0;
+  background: var(--soft);
+  z-index: 7;
+  height: 40px;
+  padding: 4px 7px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.cells th span {
+  display: block;
+  font-size: 9px;
+  font-weight: 650;
+  color: var(--muted);
+}
+.sheet.cells th:last-child,
+.sheet.cells td:last-child {
+  background-color: var(--panel);
+  text-align: inherit;
+  color: inherit;
+  border-right: 1px solid var(--line);
+}
+.sheet.cells th:last-child {
+  background-color: var(--soft);
+}
+.cells td.rowindex,
+.cells thead th:first-child {
+  position: sticky;
+  left: 0;
+  background: var(--soft);
+  z-index: 4;
+  padding: 0 4px;
+  font-size: 10px;
+  width: 42px;
+  min-width: 42px;
+}
+.cells thead th:first-child {
+  z-index: 9;
+}
+.cells td.fixedcell {
+  background-color: var(--panel);
+}
+.sheet.cells td button {
+  padding: 3px 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: 100%;
+  font: inherit;
+  text-align: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: none;
+}
+.sheet.cells td input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 100%;
+  padding: 3px 7px;
+  font: inherit;
+}
+.cells td.in-range {
+  background-image: linear-gradient(#8d72ed20, #8d72ed20);
+}
+.cells td.anchor {
+  outline: 2px solid #8468e2;
+  outline-offset: -2px;
+}
+.fill-handle {
+  width: 9px;
+  height: 9px;
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background: var(--accent);
+  border: 1px solid var(--panel);
+  z-index: 6;
+  cursor: crosshair;
+  touch-action: none;
+}
+.ctxback {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  cursor: default;
+}
+.ctxmenu {
+  position: fixed;
+  z-index: 40;
+  width: 195px;
+  max-height: 285px;
+  overflow: auto;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+  box-shadow: 0 9px 35px #14132327;
+}
+.ctxmenu button {
+  display: block;
+  padding: 6px 9px;
+  text-align: left;
+  width: 100%;
+  font-size: 12px;
+  border-radius: 4px;
+}
+.ctxmenu button:hover {
+  background: var(--active);
+  color: var(--accent);
+}
+.ruleline {
+  font-size: 12px;
+}
+.ruleline i {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+.ruleline .iconbtn {
+  margin-left: auto;
+}
+.studio2 .sheet tr {
+  content-visibility: visible;
+}
+.studio2 .editorbar .btn {
+  font-size: 12px;
+}
+.studio2 input[type="color"] {
+  cursor: pointer;
+}
+.studio2 .savedrow,
+.studio2 .panelhead,
+.studio2 .pagetitle {
+  min-width: 0;
+}
+.studio2 .slotstatus {
+  font-size: 12px;
+}
+.studio2 .modalfoot {
+  flex-wrap: wrap;
+}
+.studio2 .modal label input[type="checkbox"] {
+  width: auto;
+}
+:root[data-theme="dark"] .businesscard-art {
+  background: color-mix(in srgb, var(--tile-ink) 26%, #1c1c2d);
+  color: color-mix(in srgb, var(--tile-ink) 55%, #fff);
+}
+:root[data-theme="dark"] .sample-icon,
+:root[data-theme="dark"] .businesscard-art > span {
+  background: #242536;
+}
+@media (max-width: 1100px) {
+  .studio-layout,
+  .analytics-layout {
+    grid-template-columns: minmax(0, 1.4fr) minmax(230px, 1fr);
+  }
+  .studio-panel {
+    padding: 16px;
+  }
+  .businesscard > div:last-child {
+    padding: 10px;
+  }
+  .businessgrid {
+    gap: 9px;
+  }
+  .businesscard h3 {
+    font-size: 13px;
+  }
+  .businesscard p {
+    font-size: 11px;
+  }
+  .projectgrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .kpi {
+    padding: 12px;
+  }
+  .analytics-kpis {
+    gap: 9px;
+  }
+  .chartwrap {
+    height: 260px;
+  }
+}
+@media (max-width: 900px) {
+  .studio-layout,
+  .analytics-layout,
+  .flow-layout {
+    grid-template-columns: 1fr;
+  }
+  .configpanel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 14px;
+    align-items: end;
+  }
+  .configpanel h2 {
+    grid-column: 1/-1;
+  }
+  .flow-layout {
+    grid-template-columns: minmax(210px, 1fr) minmax(0, 1.2fr);
+  }
+  .stagefields {
+    grid-template-columns: 1fr;
+  }
+  .businessgrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .businesscard {
+    flex-direction: row;
+  }
+  .businesscard-art {
+    height: auto;
+    min-height: 85px;
+    width: 70px;
+    flex-shrink: 0;
+    padding: 0;
+    justify-content: center;
+  }
+  .businesscard-art > span {
+    display: none;
+  }
+  .businesscard-art:after {
+    display: none;
+  }
+  .project-switch {
+    max-width: 120px;
+  }
+  .studio2 .editorbar {
+    margin-bottom: 9px;
+  }
+  .kpi > div {
+    font-size: 11px;
+  }
+  .kpi .metricicon {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  .studio2 .hero {
+    min-height: 206px;
+  }
+  .studio2 .herocopy {
+    padding: 20px 17px;
+  }
+  .studio2 .project-switch {
+    display: none;
+  }
+  .studio2 .sidenav {
+    padding-top: 6px;
+  }
+  .studio2 .sidebar .brandbutton {
+    height: 63px;
+  }
+  .studio2 .sidebarbottom {
+    padding: 11px 14px;
+  }
+  .businessgrid {
+    gap: 7px;
+  }
+  .businesscard {
+    display: block;
+  }
+  .businesscard-art {
+    min-height: 45px;
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0 10px;
+  }
+  .businesscard-art > span {
+    display: grid;
+  }
+  .businesscard .sample-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+  }
+  .businesscard .sample-icon svg {
+    width: 18px;
+  }
+  .businesscard p {
+    font-size: 11px;
+    line-height: 1.45;
+  }
+  .businesscard h3 {
+    font-size: 13px;
+  }
+  .studio2 .businessgallery {
+    margin-bottom: 15px;
+  }
+  .businesscard > div:last-child {
+    padding: 8px 9px;
+  }
+  .flow-layout,
+  .projectgrid {
+    grid-template-columns: 1fr;
+  }
+  .analytics-kpis {
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+  .kpi {
+    padding: 10px;
+  }
+  .kpi b {
+    font-size: 20px;
+  }
+  .stagefields {
+    grid-template-columns: 1fr 1fr;
+  }
+  .configpanel {
+    display: block;
+  }
+  .chartwrap {
+    height: 225px;
+  }
+  .storagebanner {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .storagebanner .btn {
+    margin: 0;
+  }
+  .studio-panel {
+    padding: 13px;
+  }
+  .studio2 .panelhead {
+    flex-wrap: wrap;
+  }
+  .pipetop {
+    gap: 8px;
+  }
+  .studio2 .viewport {
+    height: 48vh;
+  }
+  .ribbon {
+    gap: 1px;
+    padding: 6px;
+  }
+  .ribbon .tool,
+  .ribbon .color-tool {
+    width: 24px;
+    height: 25px;
+  }
+  .ribbon select {
+    font-size: 11px;
+    max-width: 110px;
+  }
+  .endpoint {
+    font-size: 12px;
+  }
+  .studio-layout,
+  .flow-layout,
+  .analytics-layout {
+    gap: 11px;
+  }
+  .studio2 .filemain strong {
+    font-size: 13px;
+  }
+  .studio2 .modalfoot .btn {
+    font-size: 12px;
+  }
+  .charttypes button {
+    padding: 4px;
+  }
+}

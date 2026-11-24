@@ -1,14 +1,6 @@
+import { scrubResponse, secretKey } from "./studio/privacy";
 import Papa from "papaparse";
-import {
-  fromJSON,
-  matrix,
-  LIMIT_ROWS,
-  LIMIT_COLS,
-  LIMIT_CELLS,
-  type Grid,
-  type Cell,
-  type Format,
-} from "./core";
+import { fromJSON, matrix, type Grid, type Format } from "./core";
 export const MAX_BYTES = 16 * 1024 * 1024;
 type Imported = Grid & { name: string; format: Format };
 export async function parseFile(f: File): Promise<Imported[]> {
@@ -33,48 +25,7 @@ export async function parseFile(f: File): Promise<Imported[]> {
     return [{ ...matrix(p.data), name, format: "CSV" }];
   }
   if (ext !== "xlsx") throw Error("format");
-  const {
-    default: { Workbook },
-  } = await import("exceljs");
-  const wb = new Workbook();
-  await wb.xlsx.load(await f.arrayBuffer());
-  const out: Imported[] = [];
-  for (const sh of wb.worksheets) {
-    if (!sh.actualRowCount) continue;
-    if (
-      sh.rowCount > LIMIT_ROWS + 1 ||
-      sh.columnCount > LIMIT_COLS ||
-      sh.rowCount * sh.columnCount > LIMIT_CELLS + sh.columnCount
-    )
-      throw Error("limits");
-    const values: Cell[][] = [];
-    sh.eachRow((row) => {
-      const cells: Cell[] = [];
-      row.eachCell({ includeEmpty: true }, (c, i) => {
-        let v = c.value;
-        if (
-          v &&
-          typeof v === "object" &&
-          ("formula" in v || "sharedFormula" in v)
-        )
-          v = v.result ?? null;
-        cells[i - 1] =
-          v instanceof Date
-            ? v.toISOString()
-            : v !== null && typeof v === "object"
-              ? c.text
-              : (v ?? null);
-      });
-      values.push(cells);
-    });
-    out.push({
-      ...matrix(values),
-      name: wb.worksheets.length > 1 ? name + " · " + sh.name : name,
-      format: "XLSX",
-    });
-  }
-  if (!out.length) throw Error("empty");
-  return out;
+  return (await import("./studio/excel")).readBook(f, name);
 }
 export async function encode(
   g: Grid,
@@ -103,21 +54,7 @@ export async function encode(
       ],
       { type: "text/csv;charset=utf-8" },
     );
-  const {
-    default: { Workbook },
-  } = await import("exceljs");
-  const wb = new Workbook(),
-    sh = wb.addWorksheet("Data");
-  sh.addRow(g.cols);
-  sh.addRows(g.rows);
-  sh.getRow(1).font = { bold: true };
-  sh.columns.forEach((c) => {
-    c.width = 22;
-  });
-  sh.views = [{ state: "frozen", ySplit: 1 }];
-  return new Blob([new Uint8Array(await wb.xlsx.writeBuffer())], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  });
+  return (await import("./studio/excel")).encodeBook([g]);
 }
 export async function downloadGrid(
   g: Grid,
@@ -187,5 +124,15 @@ export async function fetchGrid(
   let obj = JSON.parse(await new Blob(parts).text());
   for (const k of path.trim().split(".").filter(Boolean))
     obj = obj && Object.hasOwn(obj, k) ? obj[k] : undefined;
-  return fromJSON(obj);
+  return fromJSON(
+    scrubResponse(
+      obj,
+      [
+        token,
+        ...Array.from(url.searchParams)
+          .filter(([key]) => secretKey.test(key))
+          .map(([, v]) => v),
+      ].filter(Boolean),
+    ),
+  );
 }

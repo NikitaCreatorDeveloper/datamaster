@@ -1,0 +1,60 @@
+{
+  "data": {
+    "shipments": [
+      {
+        "ref": "TR-1051",
+        "order": "SO-814",
+        "route": { "ru": "Казань", "en": "Kazan" },
+        "service": "express",
+        "packages": 2,
+        "fee": 680,
+        "dispatched": "2026-10-24"
+      },
+      {
+        "ref": "TR-1052",
+        "order": "SO-815",
+        "route": { "ru": "Пермь", "en": "Perm" },
+        "service": "standard",
+        "packages": 1,
+        "fee": 340,
+        "dispatched": "2026-10-24"
+      },
+      {
+        "ref": "TR-1053",
+        "order": "SO-816",
+        "route": { "ru": "Тула", "en": "Tula" },
+        "service": "standard",
+        "packages": 3,
+        "fee": 790,
+        "dispatched": "2026-10-25"
+      },
+      {
+        "ref": "TR-1054",
+        "order": "SO-817",
+        "route": { "ru": "Москва", "en": "Moscow" },
+        "service": "express",
+        "packages": 1,
+        "fee": 450,
+        "dispatched": "2026-10-25"
+      },
+      {
+        "ref": "TR-1055",
+        "order": "SO-818",
+        "route": { "ru": "Самара", "en": "Samara" },
+        "service": "standard",
+        "packages": 2,
+        "fee": 590,
+        "dispatched": "2026-10-26"
+      },
+      {
+        "ref": "TR-1056",
+        "order": "SO-819",
+        "route": { "ru": "Вологда", "en": "Vologda" },
+        "service": "standard",
+        "packages": 1,
+        "fee": 360,
+        "dispatched": "2026-10-26"
+      }
+    ]
+  }
+}

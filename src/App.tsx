@@ -23,8 +23,15 @@ import {
   PlugZap,
   X,
   Clock3,
+  BarChart3,
+  FolderOpen,
+  ScanSearch,
+  Waypoints,
+  CopyPlus,
+  Plus,
+  ChevronDown as Down,
 } from "lucide-react";
-import { seeds, demoNames, templates } from "./demo";
+import { demoNames, templates } from "./demo";
 import { type Table, type Step, type Recipe } from "./core";
 import { Dashboard, TableList, Scenarios, type DContext } from "./Dashboard";
 import { Editor } from "./Editor";
@@ -37,8 +44,36 @@ import {
   NameDialog,
   type NewTable,
 } from "./dialogs";
-import { Brand, Modal, stepLabels, type T } from "./ui";
+import { useProjects } from "./studio/projects";
+import { blankSheet } from "./studio/sheets";
+import { BusinessGallery } from "./studio/BusinessGallery";
+import { launchSample } from "./businessSamples";
+import { ProjectManager } from "./studio/ProjectManager";
+import { ApiStudio } from "./studio/ApiStudio";
+import { Quality } from "./studio/Quality";
+import { PipelineStudio } from "./studio/PipelineStudio";
+import { lazy, Suspense } from "react";
+const Analytics = lazy(() =>
+  import("./studio/Analytics").then((m) => ({ default: m.Analytics })),
+);
+import { Brand, Modal, stepLabels, errorText, type T } from "./ui";
 type Entry = { before: Table[]; ru: string; en: string; time: number };
+// Shared immutable sheets count once across snapshots. Large jobs keep fewer undo states.
+function historyWindow(entries: Entry[]) {
+  const retained: Entry[] = [],
+    seen = new Set<Table>();
+  let cells = 0;
+  for (const entry of entries.slice(0, 30)) {
+    for (const sheet of entry.before)
+      if (!seen.has(sheet)) {
+        seen.add(sheet);
+        cells += sheet.rows.length * sheet.cols.length;
+      }
+    if (cells > 5_000_000 && retained.length) break;
+    retained.push(entry);
+  }
+  return retained;
+}
 type Dialog = { kind: string; id: string };
 function read(key: string) {
   try {
@@ -54,45 +89,44 @@ function pref(key: string, v: string) {
     /* Preferences are optional in private mode. */
   }
 }
-function loadRecipes(): Recipe[] {
-  try {
-    const data = JSON.parse(read("recipes") || "[]");
-    return Array.isArray(data)
-      ? data.filter(
-          (r) =>
-            typeof r?.name === "string" &&
-            typeof r.id === "string" &&
-            Array.isArray(r.steps) &&
-            r.steps.every(
-              (s: Step) =>
-                s &&
-                Object.hasOwn(stepLabels, s.kind) &&
-                typeof s.col === "string",
-            ),
-        )
-      : [];
-  } catch {
-    return [];
-  }
-}
 const nav = [
   { id: "home", ru: "Обзор", en: "Overview", Icon: LayoutDashboard },
   { id: "tables", ru: "Таблицы", en: "Tables", Icon: Table2 },
+  { id: "analytics", ru: "Аналитика", en: "Analytics", Icon: BarChart3 },
+  {
+    id: "automation",
+    ru: "Конструктор",
+    en: "Workflow builder",
+    Icon: Waypoints,
+  },
+  { id: "studio", ru: "API Studio", en: "API Studio", Icon: PlugZap },
   { id: "scenarios", ru: "Сценарии", en: "Scenarios", Icon: Workflow },
+  {
+    id: "quality",
+    ru: "Качество данных",
+    en: "Data quality",
+    Icon: ScanSearch,
+  },
+  { id: "projects", ru: "Проекты", en: "Projects", Icon: FolderOpen },
   { id: "history", ru: "История", en: "History", Icon: History },
 ];
 export default function App() {
-  const [tables, setTables] = useState<Table[]>(seeds),
-    [recipes, setRecipes] = useState<Recipe[]>(loadRecipes),
-    [hist, setHistory] = useState<Entry[]>([]),
-    [view, setView] = useState("home"),
-    [active, setActive] = useState("catalog"),
+  const manager = useProjects(),
+    { project } = manager,
+    { tables, recipes } = project;
+  const setTables = (next: Table[]) => manager.patch({ tables: next });
+  const setRecipes = (next: Recipe[]) => manager.patch({ recipes: next });
+  const [future, setFuture] = useState<Entry[]>([]);
+  const [hist, setHistory] = useState<Entry[]>([]),
     [dialog, setDialog] = useState<Dialog | null>(null),
     [lang, setLanguage] = useState(read("lang") === "en" ? "en" : "ru"),
     [dark, setDark] = useState(read("theme") === "dark"),
     [side, setSidebar] = useState(false),
     [toast, setToast] = useState(""),
     timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const { view, sheet: active } = manager.location;
+  const setView = (view: string) => manager.navigate({ view });
+  const setActive = (sheet: string) => manager.navigate({ sheet });
   const t: T = (ru, en) => (lang === "ru" ? ru : en);
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? "dark" : "light";
@@ -132,8 +166,17 @@ export default function App() {
   const selected = tables.find((a) => a.id === active),
     dTable = tables.find((a) => a.id === dialog?.id);
   function commit(next: Table[], ru: string, en: string) {
+    if (
+      next.length > 150 ||
+      next.reduce(
+        (total, item) => total + item.cols.length * item.rows.length,
+        0,
+      ) > 3_000_000
+    )
+      throw Error("projectLimit");
+    setFuture([]);
     setHistory((h) =>
-      [{ before: tables, ru, en, time: Date.now() }, ...h].slice(0, 30),
+      historyWindow([{ before: tables, ru, en, time: Date.now() }, ...h]),
     );
     setTables(next);
   }
@@ -148,12 +191,72 @@ export default function App() {
   function undo() {
     if (!hist.length) return;
     const h = hist[0];
+    setFuture((f) => [{ ...h, before: tables }, ...f]);
     setTables(h.before);
     setHistory(hist.slice(1));
     setDialog(null);
     if (view === "editor" && !h.before.some((x) => x.id === active))
       go("tables");
     notify(t("Операция отменена", "Operation undone"));
+  }
+  function redo() {
+    const e = future[0];
+    if (!e) return;
+    setFuture(future.slice(1));
+    setHistory((h) => historyWindow([{ ...e, before: tables }, ...h]));
+    setTables(e.before);
+    if (view === "editor" && !e.before.some((a) => a.id === active))
+      go("tables");
+    notify(t("Действие повторено", "Action redone"));
+  }
+  function projectChange(fn: () => void) {
+    fn();
+    setHistory([]);
+    setFuture([]);
+    setDialog(null);
+  }
+  async function launch(id: string) {
+    try {
+      const result = await launchSample(id, t("ru", "en") === "en");
+      commit(
+        [...result.tables, ...tables],
+        "Бизнес-шаблон · " + result.tables[0].name,
+        "Business template · " + result.tables[0].name,
+      );
+      setActive(result.primary);
+      go(result.view);
+      notify(t("Шаблон выполнен", "Template complete"));
+    } catch (e) {
+      notify(errorText(e, t));
+    }
+  }
+  function processed(
+    a: Table,
+    g: import("./core").Grid,
+    steps: Step[],
+    ru: string,
+    en: string,
+  ) {
+    if (
+      Object.keys(a.meta?.formulas ?? {}).length ||
+      Object.keys(a.meta?.styles ?? {}).length
+    ) {
+      const derived = {
+        ...a,
+        ...g,
+        meta: undefined,
+        id: crypto.randomUUID(),
+        demo: false,
+        name: display(a) + " · " + t(ru, en),
+        updated: Date.now(),
+        steps,
+      };
+      commit([derived, ...tables], ru, en);
+      open(derived.id);
+    } else {
+      modify({ ...a, ...g, steps }, ru, en);
+      open(a.id);
+    }
   }
   function add(data: NewTable[], ru = "Импорт данных", en = "Imported data") {
     const added = data.map((a) => ({
@@ -172,7 +275,8 @@ export default function App() {
   }
   function saveRecipes(next: Recipe[]) {
     try {
-      localStorage.setItem("dm.recipes", JSON.stringify(next));
+      if (!manager.consent && project.id === manager.projects[0].id)
+        localStorage.setItem("dm.recipes", JSON.stringify(next));
     } catch {
       throw Error("storage");
     }
@@ -181,7 +285,7 @@ export default function App() {
   function act(kind: string, id?: string) {
     setSidebar(false);
     if (
-      !["import", "api", "recipe", "deleteRecipe"].includes(kind) &&
+      !["newSheet", "import", "api", "recipe", "deleteRecipe"].includes(kind) &&
       !tables.length
     ) {
       notify(t("Сначала импортируйте таблицу", "Import a table first"));
@@ -202,7 +306,7 @@ export default function App() {
         id ?? (view === "editor" && selected ? active : (tables[0]?.id ?? "")),
     });
   }
-  const ctx: DContext = { t, tables, recipes, display, go, act, open };
+  const ctx: DContext = { t, tables, recipes, display, go, act, open, launch };
   const current = nav.find((n) => n.id === view) ?? nav[1],
     close = () => setDialog(null),
     common = { t, close },
@@ -216,8 +320,14 @@ export default function App() {
     dialog?.kind === "recipe"
       ? templates.find((r) => r.id === dialog.id)
       : recipes.find((r) => r.id === dialog?.id);
+  if (!manager.ready)
+    return (
+      <div className="emptywell">
+        {t("Восстановление проекта…", "Restoring workspace…")}
+      </div>
+    );
   return (
-    <div className="app">
+    <div className="app studio2">
       <a className="skip" href="#main">
         {t("К содержимому", "Skip to content")}
       </a>
@@ -274,14 +384,23 @@ export default function App() {
               <ShieldCheck size={15} />
             </div>
             <small>
-              {t("Данные остаются в браузере", "Data stays in your browser")}
+              {manager.consent
+                ? manager.status === "saved"
+                  ? t("Сохранено на устройстве", "Saved on this device")
+                  : manager.status === "saving"
+                    ? t("Сохранение…", "Saving…")
+                    : t(
+                        "Состояние автосохранения · Проекты",
+                        "Storage status · Projects",
+                      )
+                : t("Данные остаются в браузере", "Data stays in your browser")}
             </small>
           </div>
           <div className="sidefoot">
             <span className="minilogo">
               <Layers3 size={13} />
             </span>
-            DataMaster Studio<span>v1.0</span>
+            DataMaster Studio<span>v2.0</span>
           </div>
         </div>
       </aside>
@@ -319,6 +438,11 @@ export default function App() {
             )}
           </div>
           <div className="topcontrols">
+            <button className="project-switch" onClick={() => go("projects")}>
+              <FolderOpen size={14} />
+              {project.name}
+              <Down size={12} />
+            </button>
             <button
               className="language"
               title={t("Switch to English", "Переключить на русский")}
@@ -339,6 +463,19 @@ export default function App() {
           </div>
         </header>
         <main id="main" className="maincontent">
+          {(manager.status === "error" || manager.status === "conflict") && (
+            <div role="alert" className="errorbox">
+              {manager.status === "conflict"
+                ? t(
+                    "Проект изменён в другой вкладке. Экспортируйте эту сессию перед перезагрузкой.",
+                    "The workspace changed in another tab. Export this session before reloading.",
+                  )
+                : t(
+                    "Автосохранение приостановлено. Экспортируйте проект.",
+                    "Autosave paused. Export your project.",
+                  )}
+            </div>
+          )}
           {view === "home" ? (
             <Dashboard ctx={ctx} />
           ) : view === "editor" && selected ? (
@@ -348,9 +485,94 @@ export default function App() {
               ctx={ctx}
               modify={modify}
               undo={undo}
+              redo={redo}
+              canRedo={!!future.length}
               canUndo={!!hist.length}
               notify={notify}
             />
+          ) : view === "projects" ? (
+            <ProjectManager
+              manager={manager}
+              t={t}
+              change={projectChange}
+              notify={notify}
+            />
+          ) : view === "studio" ? (
+            <ApiStudio
+              t={t}
+              notify={notify}
+              upsert={(g, name, id) => {
+                const old = tables.find((s) => s.id === id);
+                const sheet: Table = {
+                  ...g,
+                  id: old?.id ?? crypto.randomUUID(),
+                  name,
+                  steps: [],
+                  format: "API",
+                  updated: Date.now(),
+                };
+                commit(
+                  old
+                    ? tables.map((s) => (s.id === id ? sheet : s))
+                    : [sheet, ...tables],
+                  "Обновление API · " + name,
+                  "API refresh · " + name,
+                );
+                return sheet.id;
+              }}
+            />
+          ) : view === "automation" ? (
+            <PipelineStudio
+              t={t}
+              tables={tables}
+              active={active}
+              display={display}
+              notify={notify}
+              pipelines={project.pipelines}
+              savePipelines={(pipelines) => manager.patch({ pipelines })}
+              commit={(outputs) => {
+                const sheets = outputs.map((s) => ({
+                  ...s,
+                  id: crypto.randomUUID(),
+                  format: s.format ?? "XLSX",
+                  updated: Date.now(),
+                  steps: [],
+                }));
+                commit(
+                  [...sheets, ...tables],
+                  "Сценарий · " + sheets.length,
+                  "Workflow · " + sheets.length,
+                );
+              }}
+            />
+          ) : (view === "analytics" || view === "quality") && !tables.length ? (
+            <div className="panel emptywell">
+              <h2>{t("Нужен лист с данными", "A data sheet is required")}</h2>
+              <button className="btn primary" onClick={() => act("import")}>
+                {t("Импорт данных", "Import data")}
+              </button>
+            </div>
+          ) : view === "analytics" ? (
+            <Suspense
+              fallback={
+                <div className="emptywell">
+                  {t("Открываем отчёт…", "Opening report…")}
+                </div>
+              }
+            >
+              <Analytics
+                id={active}
+                tables={tables}
+                display={display}
+                t={t}
+                dark={dark}
+                boards={project.boards}
+                saveBoards={(boards) => manager.patch({ boards })}
+                notify={notify}
+              />
+            </Suspense>
+          ) : view === "quality" ? (
+            <Quality id={active} tables={tables} display={display} t={t} />
           ) : (
             <>
               <div className="pagetitle">
@@ -374,10 +596,19 @@ export default function App() {
                   </p>
                 </div>
                 {view === "tables" && (
-                  <button className="btn primary" onClick={() => act("import")}>
-                    <Upload size={16} />
-                    {t("Импорт данных", "Import data")}
-                  </button>
+                  <div className="buttonrow">
+                    <button className="btn" onClick={() => act("newSheet")}>
+                      <Plus size={15} />
+                      {t("Создать лист", "Create sheet")}
+                    </button>
+                    <button
+                      className="btn primary"
+                      onClick={() => act("import")}
+                    >
+                      <Upload size={16} />
+                      {t("Импорт данных", "Import data")}
+                    </button>
+                  </div>
                 )}
                 {view === "history" && (
                   <button
@@ -393,7 +624,10 @@ export default function App() {
               {view === "tables" ? (
                 <TableList ctx={ctx} all />
               ) : view === "scenarios" ? (
-                <Scenarios ctx={ctx} all />
+                <>
+                  <BusinessGallery t={t} launch={launch} />
+                  <Scenarios ctx={ctx} all />
+                </>
               ) : (
                 <div className="panel historylist">
                   {hist.length ? (
@@ -443,11 +677,7 @@ export default function App() {
               {...base}
               kind={dialog.kind as Step["kind"]}
               save={(a, s, g) => {
-                modify(
-                  { ...a, ...g, steps: [...a.steps, s] },
-                  ...stepLabels[s.kind],
-                );
-                open(a.id);
+                processed(a, g, [...a.steps, s], ...stepLabels[s.kind]);
               }}
             />
           )}
@@ -480,12 +710,13 @@ export default function App() {
                   );
                   open(result.id);
                 } else {
-                  modify(
-                    { ...a, ...g, steps: [...a.steps, ...steps] },
+                  processed(
+                    a,
+                    g,
+                    [...a.steps, ...steps],
                     "Сценарий · " + name,
                     "Scenario · " + name,
                   );
-                  open(a.id);
                 }
                 notify(t("Сценарий выполнен", "Scenario complete"));
               }}
@@ -519,6 +750,45 @@ export default function App() {
               }}
             />
           )}
+          {dialog.kind === "newSheet" && (
+            <NameDialog
+              {...common}
+              title={t("Создать пустой лист", "Create blank sheet")}
+              initial={t("Лист ", "Sheet ") + (tables.length + 1)}
+              save={(name) => {
+                const a = blankSheet(name);
+                commit(
+                  [a, ...tables],
+                  "Создан лист · " + name,
+                  "Created sheet · " + name,
+                );
+                open(a.id);
+              }}
+            />
+          )}
+          {dTable && dialog.kind === "duplicate" && (
+            <NameDialog
+              {...common}
+              title={t("Копировать лист", "Duplicate sheet")}
+              initial={display(dTable) + " (" + t("копия", "copy") + ")"}
+              save={(name) => {
+                const a = {
+                  ...dTable,
+                  meta: { ...dTable.meta, tabName: name },
+                  id: crypto.randomUUID(),
+                  name,
+                  demo: false,
+                  updated: Date.now(),
+                };
+                commit(
+                  [a, ...tables],
+                  "Копия листа · " + name,
+                  "Duplicated sheet · " + name,
+                );
+                open(a.id);
+              }}
+            />
+          )}
           {dTable && dialog.kind === "rename" && (
             <NameDialog
               {...common}
@@ -526,7 +796,7 @@ export default function App() {
               initial={display(dTable)}
               save={(name) => {
                 modify(
-                  { ...dTable, name },
+                  { ...dTable, name, meta: { ...dTable.meta, tabName: name } },
                   "Таблица переименована",
                   "Renamed table",
                 );
@@ -547,6 +817,11 @@ export default function App() {
                     kind: "export",
                     I: Download,
                     label: t("Экспорт", "Export"),
+                  },
+                  {
+                    kind: "duplicate",
+                    I: CopyPlus,
+                    label: t("Копировать лист", "Duplicate sheet"),
                   },
                   {
                     kind: "rename",
