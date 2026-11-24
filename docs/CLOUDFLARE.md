@@ -4,7 +4,7 @@ DataMaster размещается как статическое приложен
 
 ## Загрузка готовой сборки
 
-1. Скачайте **DataMaster-Cloudflare-Pages.zip** из [релиза проекта](https://github.com/NikitaCreatorDeveloper/datamaster/releases/latest). В корне архива находятся index.html, каталог assets, иконка и файл заголовков _headers.
+1. Скачайте [DataMaster-Cloudflare-Pages.zip](https://raw.githubusercontent.com/NikitaCreatorDeveloper/datamaster/downloads-v1.0.0/DataMaster-Cloudflare-Pages.zip). В корне архива находятся index.html, каталог assets, иконка и файл заголовков _headers.
 2. В панели Cloudflare откройте **Workers & Pages**, создайте приложение **Pages** и выберите **Direct Upload / Upload assets**. Загрузите ZIP или извлеките его и перетащите каталог со сборкой.
 3. Выберите свободное имя проекта и нажмите **Deploy**. После завершения откройте выданный Cloudflare адрес на pages.dev.
 

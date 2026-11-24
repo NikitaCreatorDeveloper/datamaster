@@ -4,7 +4,7 @@
 
 ![Рабочее пространство DataMaster](docs/screenshots/01-workspace.png)
 
-**Быстрый запуск:** скачайте [DataMaster.html из релиза](https://github.com/NikitaCreatorDeveloper/datamaster/releases/latest/download/DataMaster.html) и откройте его в современном браузере. Табличные операции работают без сети. Для REST API удобнее HTTPS-размещение, поскольку браузер может передавать для локального файла origin `null`. Сборка этого файла воспроизводится командой `npm run package:offline`.
+**Быстрый запуск:** скачайте [архив автономной версии](https://raw.githubusercontent.com/NikitaCreatorDeveloper/datamaster/downloads-v1.0.0/DataMaster-Offline.zip), распакуйте и откройте DataMaster.html в современном браузере. Табличные операции работают без сети. Для REST API удобнее HTTPS-размещение, поскольку браузер может передавать для локального файла origin `null`. Сборка этого файла воспроизводится командой `npm run package:offline`.
 
 ## Демонстрация за минуту
 
@@ -70,7 +70,7 @@ npm run test:offline
 ## Публикация и портфолио
 
 - [Инструкция для Cloudflare Pages](docs/CLOUDFLARE.md)
-- [Скачать архив для Cloudflare Pages](https://github.com/NikitaCreatorDeveloper/datamaster/releases/latest/download/DataMaster-Cloudflare-Pages.zip)
+- [Скачать архив для Cloudflare Pages](https://raw.githubusercontent.com/NikitaCreatorDeveloper/datamaster/downloads-v1.0.0/DataMaster-Cloudflare-Pages.zip)
 - [Светлая тема](docs/screenshots/01-workspace.png) · [Тёмная тема](docs/screenshots/02-dark.png) · [Смартфон](docs/screenshots/03-mobile.png) · [Редактор](docs/screenshots/04-editor.png)
 
 ## Устройство проекта
