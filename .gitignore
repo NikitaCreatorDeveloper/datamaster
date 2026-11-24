@@ -1,0 +1,9 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+.env*
+.wrangler/
+.DS_Store
+release/
+.openai/
