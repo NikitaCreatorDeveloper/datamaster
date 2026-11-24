@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "test": "tsx --test tests/core.test.ts",
     "test:e2e": "playwright test",
-    "package:pages": "npm run build && node scripts/package-pages.mjs"
+    "package:pages": "npm run build && node scripts/package-pages.mjs",
+    "package:offline": "node scripts/package-offline.mjs",
+    "test:offline": "npm run package:offline && node tests/offline.mjs"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",

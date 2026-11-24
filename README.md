@@ -4,6 +4,8 @@
 
 ![Рабочее пространство DataMaster](docs/screenshots/01-workspace.png)
 
+**Быстрый запуск:** скачайте [DataMaster.html из релиза](https://github.com/NikitaCreatorDeveloper/datamaster/releases/latest/download/DataMaster.html) и откройте его в современном браузере. Табличные операции работают без сети. Для REST API удобнее HTTPS-размещение, поскольку браузер может передавать для локального файла origin `null`. Сборка этого файла воспроизводится командой `npm run package:offline`.
+
 ## Демонстрация за минуту
 
 1. На главной странице выберите **Обновление прайса → Запустить сценарий**. DataMaster создаст копию каталога из 248 товаров, добавит столбец «Розничная цена» с наценкой 15% и отсортирует строки по убыванию цены.
@@ -56,6 +58,7 @@ npm test
 npm run build
 npx playwright install chromium
 npm run test:e2e
+npm run test:offline
 ```
 
 Для браузерного теста HTTPS/CORS также требуется команда `openssl`. В Linux необходимы системные библиотеки Chromium. Чтобы использовать уже установленный браузер, задайте `CHROMIUM_PATH=/usr/bin/chromium`.
